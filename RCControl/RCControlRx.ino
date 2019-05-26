@@ -14,10 +14,12 @@ Servo mServo; // servo initialization
     moving the shaft to that orientation. On a continuous rotation servo, this 
     will set the speed of the servo.
 */
-int post = 0; //(0: full-speed in one direction, 180: full speed in the other direction, value near 90: no movement).
+
+int post = 0; // 0:   full-speed in one direction,
+              // 180: full speed in the other direction
+              // 90:  no movement).
 int channel1, channel2, channel3, channel4, channel5, channel6;
 unsigned long currTime = 0;
-const long interval = 100;
 
 void setup()
 {
@@ -27,7 +29,7 @@ void setup()
     pinMode(AUTO_PIN, INPUT);
     pinMode(EBRAKE_PIN, INPUT);
     pinMode(REVERSE_PIN, INPUT);
-    mServo.attach(THROTTLE_PIN); // attaches the servo on pin 9 -- change pin number accordingly
+    mServo.attach(9); // attaches the servo on pin 9 or 10 only
     Serial.begin(SERIAL_USB_UART);
 }
 
@@ -48,22 +50,23 @@ void loop()
     if ((channel1 >= 1500) && (channel1 <= 1600))
     {
         Serial.println("Throttle -- Default");
-        pos = 90;           //set servo to center
-        myservo.write(pos); // set to pos which is 90
+        pos = 90;
+        mServo.write(pos);
     }
     else
     {
         Serial.println("Throttle -- Moving");
-        for (pos = 0; pos < 180; pos += 1) // goes from 0 degrees to 180 degrees
-        {                                  // in steps of 1 degree
-            myservo.write(pos);            // tell servo to go to position in variable 'pos'
-            delay(1);                      // waits 1ms for the servo to reach the position
+        // Testing servo to move forward from 0 to 180 and vice versa.
+        for (pos = 0; pos < 180; pos += 1)
+        {
+            mServo.write(pos);
+            waitForProcess(1); // waits 1ms for the servo to reach the position
         }
 
-        for (pos = 180; pos >= 1; pos -= 1) // goes from 180 degrees to 0 degrees
+        for (pos = 180; pos >= 1; pos -= 1)
         {
-            myservo.write(pos); // tell servo to go to position in variable 'pos'
-            delay(1);           // waits 1ms for the servo to reach the position
+            mServo.write(pos);
+            waitForProcess(1); // waits 1ms for the servo to reach the position
         }
     }
 
@@ -71,26 +74,50 @@ void loop()
     if ((channel2 >= 1500) && (channel2 <= 1600))
     {
         Serial.println("Turn -- Default");
-        pos = 90;           //set servo to center
-        myservo.write(pos); // set to pos which is 90
+        pos = 90;          //set servo to center
+        mServo.write(pos); // set to pos which is 90
     }
     else
     {
         Serial.println("Turn -- Moving");
+                // Testing servo to move forward from 0 to 180 and vice versa.
+        for (pos = 0; pos < 180; pos += 1)
+        {
+            mServo.write(pos);
+            waitForProcess(1); // waits 1ms for the servo to reach the position
+        }
+
+        for (pos = 180; pos >= 1; pos -= 1)
+        {
+            mServo.write(pos);
+            waitForProcess(1); // waits 1ms for the servo to reach the position
+        }
     }
 
     // Checking Reverse
     if ((channel6 >= 1500) && (channel6 <= 1600))
     {
         Serial.println("Reverse -- Default");
-        pos = 90;           //set servo to center
-        myservo.write(pos); // set to pos which is 90
+        pos = 90;          //set servo to center
+        mServo.write(pos); // set to pos which is 90
     }
     else
     {
         Serial.println("Reverse -- Moving");
+                // Testing servo to move forward from 0 to 180 and vice versa.
+        for (pos = 0; pos < 180; pos += 1)
+        {
+            mServo.write(pos);
+            waitForProcess(1); // waits 1ms for the servo to reach the position
+        }
+
+        for (pos = 180; pos >= 1; pos -= 1)
+        {
+            mServo.write(pos);
+            waitForProcess(1); // waits 1ms for the servo to reach the position
+        }
     }
-    waitForProcess();
+    waitForProcess(100);
 }
 
 /*
@@ -118,7 +145,7 @@ void logger(String str)
     Serial.println(str);
 }
 
-void waitForProcess()
+void waitForProcess(long interval)
 {
     currTime = millis();
     while (millis() < currTime + interval)

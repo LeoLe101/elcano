@@ -18,6 +18,7 @@
                       // SAMD21 Arduino will do nothing*/
 
 #define TX_LED_LINK 6 // LED pins on the transmitter
+#define NO_PACKAGE -1 // LED pins on the transmitter
 
 // other outputs
 #define SS_PIN 10

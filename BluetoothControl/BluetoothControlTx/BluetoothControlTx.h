@@ -1,8 +1,6 @@
-#ifndef SOFTWARE_SERIAL_H
-#define SOFTWARE_SERIAL_H
-
-#define UART_BAUDRATE_BT_SERIAL 115200
-#define UART_BAUDRATE_SERIAL_USB 9600
+#define UART_BAUDRATE 9600
+#define BUFFER_LIMIT 17
+#define ACK_LIMIT 5
 
 // transmitter input pins
 #define TURN_PIN A3     // joystick 2 L/R
@@ -23,16 +21,12 @@
 #define SS_PIN 10
 /* pins 11 - 13 are reserved for SPI */
 
-// The encryption key has to be the same for transmitter and receiver
-uint8_t key[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00};
 
 typedef struct
 {
     unsigned int throttle;
     unsigned int turn;
-    unsigned char ebrake;
-    unsigned char autonomous;
+    bool ebrake;
+    bool autonomous;
+    bool reverse; // Future Stuff
 } dataFromTransmitter;
-
-#endif

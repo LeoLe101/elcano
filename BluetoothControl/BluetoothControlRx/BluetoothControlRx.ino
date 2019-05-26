@@ -1,165 +1,100 @@
 #include "BluetoothControlRx.h"
 
 // initialize package and variables
-dataFromTransmitter rxData;
-
-String btData = "";
-bool received = true;
+dataFromTransmitter receiverDat;
+// Utilities variables
 unsigned long currTime = 0;
-const long interval = 10;
+int counter = 0;
+// Data/Buffer variables
+String logger;
+char dataBuffer[BUFFER_LIMIT];
+char ackBuffer[ACK_LIMIT];
+char dataChar;
 
 void setup()
 {
-    // @TODO: need to reconfigure pins for data received
-    // pinMode(TURN_PIN, INPUT);
-    // pinMode(THROTTLE_PIN, INPUT);
-    // pinMode(AUTO_PIN, INPUT_PULLUP);
-    // pinMode(EBRAKE_PIN, INPUT_PULLUP);
-    // pinMode(TX_LED_LINK, OUTPUT);
-
-    SerialUSB.begin(UART_BAUDRATE_SERIAL_USB);
-    Serial1.begin(UART_BAUDRATE_SERIAL_USB); // Init hardware serial port --> PIN: 0 (RX) | 1 (TX)
+    // Init hardware serial port --> PIN: 0 (RX) | 1 (TX)
+    Serial1.begin(UART_BAUDRATE);
+    SerialUSB.begin(UART_BAUDRATE); // Serial Monitor
 
     if (DEBUG)
         // wait until SerialUSB initialize
         while (!SerialUSB)
             ;
 
-    String initMesg = "** RecX Init at " + String(UART_BAUDRATE_SERIAL_USB);
+    logger = "ACK@";
+    logger.toCharArray(ackBuffer, ACK_LIMIT);
+    String initMesg = "** RecX Init at " + String(UART_BAUDRATE);
     SerialUSB.println(initMesg);
     SerialUSB.println("Setup Complete!");
 }
 
 void loop()
 {
-    processData();
-    ackPackage();
+    // Checks whether data is comming from the serial port
+    while (Serial1.available() > 0)
+    {
+        processComingData();
+    }
+   ackMessage();
 }
 
 /**
  * --------------------- Helper Functions --------------------------------
  */
 
-// Read data from Bluetooth module
-void processData()
+// Gather/Process data and put it into dataBuffer buffer for parsing
+void processComingData()
 {
-    // If the data is sent to the monitor
-    if (SerialUSB.available())
+    dataChar = Serial1.read(); // Reads the data from the serial port
+    if (dataChar == '@')
     {
-        // While the data is available
-        while (SerialUSB.available())
-        {
-            rxData.turn = SerialUSB.read();
-            waitForProcess();
-            rxData.throttle = SerialUSB.read();
-            waitForProcess();
-            rxData.autonomous = SerialUSB.read();
-            waitForProcess();
-            rxData.ebrake = SerialUSB.read();
-        }
-        waitForProcess();
-        if (DEBUG)
-        {
-            logger("FIRST READ");
-            btData = "turn (" + String(rxData.turn) + ")";
-            logger(btData);
-            btData = "throttle (" + String(rxData.throttle) + ")";
-            logger(btData);
-            btData = "Autonomous (" + String(rxData.autonomous) + ")";
-            logger(btData);
-            btData = "Ebrake (" + String(rxData.ebrake) + ")";
-            logger(btData);
-        }
-
-        // Data is invalid! Return
-        if (!validateData())
-        {
-            return;
-        }
-
-        // convert data Byte back to origin value (0-256 to 0-1023)
-        rxData.turn = rxData.turn * 4;
-        rxData.throttle = rxData.throttle * 4;
-
-        if (DEBUG)
-        {
-            logger("AFTER NORMALIZED");
-            btData = "turn (" + String(rxData.turn) + ")";
-            logger(btData);
-            btData = "throttle (" + String(rxData.throttle) + ")";
-            logger(btData);
-            btData = "Autonomous (" + String(rxData.autonomous) + ")";
-            logger(btData);
-            btData = "Ebrake (" + String(rxData.ebrake) + ")";
-            logger(btData);
-        }
+        // End of this data reached! Parsing process start
+        dataParser(dataBuffer);
+        counter = 0;
+        dataBuffer[counter] = NULL;
+    }
+    else
+    {
+        dataBuffer[counter] = dataChar;
+        counter++;
+        dataBuffer[counter] = '\0'; // Keep the string NULL terminated
     }
 }
 
-void ackPackage()
+// Parse the completed data buffer from the transmitter
+void dataParser(char *dataRecv)
 {
-    // ACK package and send the mesg to the Bluetooh module (Send to PIN 1-TX)
+    SerialUSB.print("Parsing...");
+    for (int i = 0; i < BUFFER_LIMIT; i++)
+    {
+        if (dataRecv[i] == '|')
+        {
+            // Skip this character
+            SerialUSB.print(" -- ");
+            continue;
+        }
+        else
+            SerialUSB.print(dataRecv[i]);
+    }
+}
+
+// ACKNOWLEDGE the data received
+void ackMessage()
+{
+    SerialUSB.println();
     if (Serial1.available())
     {
-        if (!received)
-        {
-            btData = "...No package received...";
-            Serial1.print(btData);
-            received = true; // reset received
-        }
-        else
-        {
-            btData = "Data -- " + String(rxData.throttle) + "," + String(rxData.turn);
-            Serial1.print(btData);
-        }
+        Serial1.print("ACK");
     }
-}
-
-bool validateData()
-{
-    if (DEBUG)
-    {
-        // In case no package received
-        if (rxData.turn == NO_PACKAGE)
-        {
-            received = false;
-        }
-        else if (rxData.throttle == NO_PACKAGE)
-        {
-            received = false;
-        }
-        // else if (rxData.autonomous == NO_PACKAGE)
-        // {
-        //     received = false;
-        // }
-        // else if (rxData.ebrake == NO_PACKAGE)
-        // {
-        //     received = false;
-        // }
-        // Write back to the Transmitter (ACK package received) and normalize data
-        else
-        {
-            // @TODO normalize and process the data here
-            SerialUSB.print("Received: ");
-            SerialUSB.println(btData);
-        }
-    }
-    return received;
 }
 
 // Better version of delay() in Arduino Lib
-void waitForProcess()
+void waitForProcess(long interval)
 {
     currTime = millis();
     while (millis() < currTime + interval)
     {
-        ; // Wait for 10 ms to ensure packages are received
+        ; // Wait for "interval" ms to ensure packages are received
     }
-}
-
-// Use for Debugging
-void logger(String data)
-{
-    SerialUSB.print("Logger: ");
-    SerialUSB.println(data);
 }
