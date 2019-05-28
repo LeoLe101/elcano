@@ -32,7 +32,9 @@ void loop()
     readInputs();
 
     // Send the values to through Bluetooh module
-    String str = String(2056) + '|' + String(1025) + '|' + String(0) + '|' + String(1) + '|' + String(0) + '@';
+    String str = String(transmitterDat.turn) + '|' + String(transmitterDat.throttle) 
+    + '|' + String(transmitterDat.autonomous) + '|' + String(transmitterDat.ebrake) 
+    + '|' + String(transmitterDat.reverse) + '@';
     str.toCharArray(dataBuffer, BUFFER_LIMIT);
 
     for (int i = 0; i < BUFFER_LIMIT; i++)
@@ -41,7 +43,6 @@ void loop()
         SerialUSB.write(dataBuffer[i]);
     }
     SerialUSB.println();
-
     // Read from Bluetooh module and send to Arduino Serial Monitor
     // (Receiving ACK message from the RX)
     while (Serial1.available() > 0)
@@ -71,6 +72,7 @@ void readInputs()
     transmitterDat.throttle = analogRead(THROTTLE_PIN);
     transmitterDat.autonomous = digitalRead(AUTO_PIN);
     transmitterDat.ebrake = digitalRead(EBRAKE_PIN);
+    transmitterDat.ebrake = digitalRead(REVERSE_PIN);
 }
 
 // Better version of delay() in Arduino Lib

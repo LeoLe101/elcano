@@ -2,7 +2,7 @@
 #include <SPI.h>
 #include "RadioControl_rf69.h"
 
-#define TRANSMITTER 0 // set false to compile receiver code
+#define TRANSMITTER 1 // set false to compile receiver code
 #define DEBUG 1       /*prints debugging info to serialUSB, can impact loop time
                         WARNING: when true (!0), you must connect USB to allow hardware reset, otherwise
                         SAMD21 Arduino will do nothing*/
@@ -78,6 +78,7 @@ void setLights() {
 void txloop()
 {
   readInputs();
+  SerialUSB.println(String(txData.throttle));
   // Send a message to receiver unit
   driver.send((unsigned char*)(&txData), lenTx);
   driver.waitPacketSent();
@@ -91,8 +92,10 @@ void txloop()
       txData.rssi = driver.rssiRead();
       setLights();
       timeRecv = millis();
-      if (DEBUG)
+      if (DEBUG) {
         SerialUSB.println(String(rxData.rssi / 2.0));
+      }
+        
 
       unsigned long interval = timeRecv - timeSent;
       unsigned long msDelay = BACKOFF - interval;
@@ -173,4 +176,3 @@ void printTx(bool newline) {
     SerialUSB.print(packet);
   }
 }
-
