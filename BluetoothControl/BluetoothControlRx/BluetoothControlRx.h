@@ -1,10 +1,11 @@
 // Arduino Serial Port 
-#define UART_BAUDRATE 38400 // The current TX has to be at 9600 Baurd rate so that the RX can read the data at 38400 Buard rate --- This is off, but it works for now.
-#define BUFFER_LIMIT 18
+#define UART_BAUDRATE 38400
+#define BUFFER_LIMIT 20
 #define ACK_LIMIT 5
 
 // Arduino Debugger
 #define NO_PACKAGE -1 // No package received
+#define DEBUG_PARSE 0 // This debug only for process coming data function
 #define DEBUG 1       // Prints debugging info to serialUSB, can impact loop time                        
                       // WARNING: when true (!0), you must connect USB to allow hardware reset, otherwise
                       // SAMD21 Arduino will do nothing*/
@@ -17,4 +18,4 @@ typedef struct
     bool ebrake;
     bool autonomous;
     bool reverse; // Future Stuff
-} dataFromTransmitter;
+} receiverData;

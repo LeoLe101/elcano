@@ -1,7 +1,7 @@
 #include "BluetoothControlTx.h"
 
 // initialize package
-dataFromTransmitter transmitterDat;
+transmitterData transmitterDat;
 // Utilities variables
 unsigned long currTime = 0;
 unsigned int counter = 0;
@@ -32,9 +32,9 @@ void loop()
     readInputs();
 
     // Send the values to through Bluetooh module
-    String str = String(transmitterDat.turn) + '|' + String(transmitterDat.throttle) 
-    + '|' + String(transmitterDat.autonomous) + '|' + String(transmitterDat.ebrake) 
-    + '|' + String(transmitterDat.reverse) + '@';
+    String str = 'T' + String(transmitterDat.turn) + 'F' + String(transmitterDat.throttle) 
+    + 'A' + String(transmitterDat.autonomous) + 'E' + String(transmitterDat.ebrake) 
+    + 'R' + String(transmitterDat.reverse) + '@';
     str.toCharArray(dataBuffer, BUFFER_LIMIT);
 
     for (int i = 0; i < BUFFER_LIMIT; i++)
@@ -60,7 +60,7 @@ void loop()
         }
     }
     counter = 0;
-    waitForProcess(1000);
+    waitForProcess(100);
 }
 
 /**
@@ -72,7 +72,7 @@ void readInputs()
     transmitterDat.throttle = analogRead(THROTTLE_PIN);
     transmitterDat.autonomous = digitalRead(AUTO_PIN);
     transmitterDat.ebrake = digitalRead(EBRAKE_PIN);
-    transmitterDat.ebrake = digitalRead(REVERSE_PIN);
+    transmitterDat.reverse = digitalRead(REVERSE_PIN);
 }
 
 // Better version of delay() in Arduino Lib

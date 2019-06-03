@@ -1,6 +1,6 @@
 // Arduino Serial Port 
 #define UART_BAUDRATE 9600 // The current TX has to be at 9600 Baurd rate so that the RX can read the data at 38400 Buard rate --- This is off, but it works for now.
-#define BUFFER_LIMIT 18
+#define BUFFER_LIMIT 20
 #define ACK_LIMIT 5
 
 // transmitter input pins
@@ -23,4 +23,4 @@ typedef struct
     bool ebrake;
     bool autonomous;
     bool reverse; // Future Stuff
-} dataFromTransmitter;
+} transmitterData;
