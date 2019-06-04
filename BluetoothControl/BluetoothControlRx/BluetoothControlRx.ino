@@ -1,6 +1,6 @@
 #include "BluetoothControlRx.h"
-#include <Can_Protocol.h>
-#include <mcp_can.h>
+#include "Can_Protocol.h"
+#include <mcp_can.h> // using mcp_can lib from Seeed Studio
 
 // Core Variables
 receiverData receiverDat;
@@ -13,11 +13,11 @@ int throttleCounter = 0;
 
 // Data/Buffer variables
 String logger;
-char turnBuffer[BUFFER_LIMIT];
-char throttleBuffer[BUFFER_LIMIT];
-char ackBuffer[ACK_LIMIT];
-char dataChar;
-char dividerChar;
+uint8_t turnBuffer[BUFFER_LIMIT]; // uint8_t is similar to unsigned char --> which is a byte
+uint8_t throttleBuffer[BUFFER_LIMIT];
+uint8_t ackBuffer[ACK_LIMIT];
+uint8_t dataChar;
+uint8_t dividerChar;
 
 void setup()
 {
@@ -39,10 +39,11 @@ void setup()
         if (DEBUG)
         {
             SerialUSB.println("CAN BUS Shield init fail");
+            SerialUSB.println("Re-initializing...");
         }
         delay(1000);
     }
-    
+
     if (DEBUG)
     {
         SerialUSB.println("CAN BUS init ok!");
@@ -64,6 +65,7 @@ void loop()
             SerialUSB.println(str);
         }
     }
+    // transferToCanBus();
     //    ackMessage();
 }
 
@@ -156,8 +158,15 @@ void dataParser()
 }
 
 // Process the data over the CAN BUS protocal
-void toCanBus()
+void transferToCanBus()
 {
+    if (DEBUG)
+    {
+        SerialUSB.println("Sending data to CAN BUS...");
+    }
+
+    CAN.sendMsgBuf(RCDrive_CANID, 0, BUFFER_LIMIT, (uint8_t *)&receiverDat); // RCDrive_CANID or RCStatus_CANID i dont know...
+    wait(100);
 }
 
 // ACKNOWLEDGE the data received
