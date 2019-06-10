@@ -1,10 +1,10 @@
 #include "BluetoothControlRx.h"
-#include "Can_Protocol.h"
-#include <mcp_can.h> // using mcp_can lib from Seeed Studio
+//#include "Can_Protocol.h"
+//#include <mcp_can.h> // using mcp_can lib from Seeed Studio
 
 // Core Variables
 receiverData receiverDat;
-MCP_CAN CAN(49); // chip selection pin for CAN. 53 for mega, 49 for our new low level board
+//MCP_CAN CAN(49); // chip selection pin for CAN. 53 for mega, 49 for our new low level board
 
 // Utilities variables
 unsigned long currTime = 0;
@@ -13,16 +13,16 @@ int throttleCounter = 0;
 
 // Data/Buffer variables
 String logger;
-uint8_t turnBuffer[BUFFER_LIMIT]; // uint8_t is similar to unsigned char --> which is a byte
-uint8_t throttleBuffer[BUFFER_LIMIT];
-uint8_t ackBuffer[ACK_LIMIT];
-uint8_t dataChar;
-uint8_t dividerChar;
+char turnBuffer[BUFFER_LIMIT]; // char is similar to unsigned char --> which is a byte
+char throttleBuffer[BUFFER_LIMIT];
+char ackBuffer[ACK_LIMIT];
+char dataChar;
+char dividerChar;
 
 void setup()
 {
-    logger = "ACK@";
-    logger.toCharArray(ackBuffer, ACK_LIMIT);
+//    logger = "ACK@";
+//    logger.toCharArray(ackBuffer, ACK_LIMIT);
 
     // Init hardware serial port --> PIN: 0 (RX) | 1 (TX)
     Serial1.begin(UART_BAUDRATE);
@@ -34,15 +34,15 @@ void setup()
             ;
 
     // Inital CAN bus with 500KBPS baud rate (CAN_500KBPS is the baud rate)
-    while (CAN_OK != CAN.begin(CAN_500KBPS))
-    {
-        if (DEBUG)
-        {
-            SerialUSB.println("CAN BUS Shield init fail");
-            SerialUSB.println("Re-initializing...");
-        }
-        delay(1000);
-    }
+    //    while (CAN_OK != CAN.begin(CAN_500KBPS))
+    //    {
+    //        if (DEBUG)
+    //        {
+    //            SerialUSB.println("CAN BUS Shield init fail");
+    //            SerialUSB.println("Re-initializing...");
+    //        }
+    //        delay(1000);
+    //    }
 
     if (DEBUG)
     {
@@ -64,9 +64,11 @@ void loop()
             String str = "Parsed value: T" + String(receiverDat.turn) + " F" + String(receiverDat.throttle) + " A" + String(receiverDat.autonomous) + " E" + String(receiverDat.ebrake) + " R" + String(receiverDat.reverse) + " @";
             SerialUSB.println(str);
         }
+             transferToCanBus();
+             //    ackMessage();
     }
-    // transferToCanBus();
-    //    ackMessage();
+
+    
 }
 
 /**
@@ -165,8 +167,8 @@ void transferToCanBus()
         SerialUSB.println("Sending data to CAN BUS...");
     }
 
-    CAN.sendMsgBuf(RCDrive_CANID, 0, BUFFER_LIMIT, (uint8_t *)&receiverDat); // RCDrive_CANID or RCStatus_CANID i dont know...
-    wait(100);
+    //    CAN.sendMsgBuf(RCDrive_CANID, 0, BUFFER_LIMIT, (char *)&receiverDat); // RCDrive_CANID or RCStatus_CANID i dont know...
+    //    wait(100);
 }
 
 // ACKNOWLEDGE the data received

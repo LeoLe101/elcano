@@ -19,3 +19,10 @@ typedef struct
     bool autonomous;
     bool reverse; // Future Stuff
 } receiverData;
+
+#define RCStatus_CANID 0x50
+#define HiStatus_CANID 0x100
+#define LowStatus_CANID 0x200
+#define RCDrive_CANID 0x300
+#define HiDrive_CANID 0x350
+#define Actual_CANID 0x500
